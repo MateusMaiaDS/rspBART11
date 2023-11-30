@@ -999,7 +999,19 @@ update_tau_betas_j <- function(forest,
       cu_t <- forest[[i]][[t_nodes_names[j]]]
       cu_t$ancestors <- cu_t$j
       var_ <- cu_t$ancestors
-      # for(var_ in 1:cu_t$ancestors){
+
+
+            # Getting the interactions as well
+            if(!any(is.na(cu_t$inter))){
+              interaction_index <- cu_t$inter
+              interaction_index <- sapply(interaction_index,function(x){sort(c(cu_t$j,x))})
+              for(ii in 1:NCOL(interaction_index)){
+                var_ <- c(var_,paste0(interaction_index[,ii],collapse = ""))
+              }
+              # for(var_ in 1:cu_t$ancestors){
+              var_ <- which(names(data$basis_subindex) %in% var_)
+            }
+
 
             # Getting ht leaf basis
             leaf_basis_subindex <- unlist(data$basis_subindex[var_]) # Recall to the unique() function here

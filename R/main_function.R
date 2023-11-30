@@ -602,11 +602,15 @@ rspBART <- function(x_train,
 
       # Sample a verb
       verb <- sample(c("grow","prune", "change"), prob = c(0.3,0.3,0.4),size = 1)
-      verb <- sample(c("grow","prune"),size = 1)
+      # verb <- sample(c("grow","prune"),size = 1)
 
-      if(i<500){
-        verb <- "change"
-      }
+      # Verifuy this line here, if does really make change
+      # if(i<500){
+      #   verb <- "change"
+      # }
+
+      # Checking the trees variables
+      # lapply(forest,function(x){x$node0$j}) %>% unlist%>% table()
 
       # # Forcing to grow when only have a stump
       # if(length(forest[[t]])==1){

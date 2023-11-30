@@ -32,7 +32,7 @@ y_train <- sim_train$y
 
 # x_train <- x_train[,1:5]
 # x_test <- x_test[,1:5]
-n_tree <- 20
+n_tree <- 10
 node_min_size = 2
 n_mcmc = 3000
 n_burn = 500
@@ -42,7 +42,7 @@ df = 3
 sigquant = 0.9
 kappa = 2
 tau = 1
-scale_bool = FALSE
+scale_bool = TRUE
 stump = FALSE
 no_rotation_bool = FALSE
 numcut = 100L # Defining the grid of split rules
@@ -57,8 +57,8 @@ use_bs <- FALSE
 plot_preview = FALSE
 intercept <- FALSE
 all_var <- TRUE
-scale_init <- TRUE
-update_tau_beta <- FALSE
+scale_init <- FALSE
+update_tau_beta <- TRUE
 main_effects_pred <- TRUE
 # interaction_list_ <- interaction_list <- list(c(1,2))
 interaction_list <- NULL
