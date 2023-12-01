@@ -101,12 +101,18 @@ nodeLogLike <- function(curr_part_res,
 
 
   if(data$dif_order==0){
+    # P_aux <- data$P[D_subset_index,D_subset_index]
+    # for(jj in 1:length(j_)){
+    #   P_aux[data$basis_subindex[[jj]],data$basis_subindex[[jj]]] <- data$tau_beta[jj]*data$P[data$basis_subindex[[jj]],data$basis_subindex[[jj]]]
+    # }
       cov_aux <- diag(x = (data$tau^(-1)),nrow = n_leaf) + D_leaf%*%tcrossprod(diag_tau_beta_inv,D_leaf)
   } else {
-      P_aux <- data$P[D_subset_index,D_subset_index]
+      P_aux <- data$P
       for(jj in 1:length(j_)){
         P_aux[data$basis_subindex[[jj]],data$basis_subindex[[jj]]] <- data$tau_beta[jj]*data$P[data$basis_subindex[[jj]],data$basis_subindex[[jj]]]
       }
+      P_aux <- data$P[D_subset_index,D_subset_index]
+
       cov_aux <- diag(x = (data$tau^(-1)),nrow = n_leaf) + D_leaf%*%solve(P_aux,t(D_leaf))
 
   }
@@ -336,6 +342,7 @@ add_interaction <- function(tree,
   nog_nodes <- get_nogs(tree)
   n_nog_nodes <- length(nog_nodes)
   g_node_name <- sample(terminal_nodes,size = 1)
+  # g_node_name <- "node2"
   g_node <- tree[[g_node_name]]
 
 
@@ -350,6 +357,7 @@ add_interaction <- function(tree,
       # Sample a split var
       # ===== Uncomment this line below after ========
       p_var <- sample(interaction_candidates,size = 1)
+      p_var <- 2
       # ==============================================
       # Getting the interaction name
       int_name_ <- paste0(sort(c(p_var,g_node$j)),collapse = '')
@@ -934,12 +942,13 @@ updateBetas <- function(tree,
 
     #  Calculating the quantities need to the posterior of \beta
     b_ <- crossprod(D_leaf,res_leaf)
-    data_tau_beta_diag <- rep(data$tau_beta, NCOL(D_leaf))
-    U_ <- data$P[leaf_basis_subindex,leaf_basis_subindex, drop = FALSE]
+    data_tau_beta_diag <- rep(data$tau_beta[node_index_var], NCOL(D_leaf)) # Don't really use this
+    U_ <- data$P
     for(k in 1:length(unique(node_index_var))){
-      aux_P_indexes <- unlist(data$basis_subindex[k])
+      aux_P_indexes <- unlist(data$basis_subindex[node_index_var[k]])
       U_[aux_P_indexes,aux_P_indexes] <- U_[aux_P_indexes,aux_P_indexes]*(data$tau_beta[node_index_var[k]])
     }
+    U_ <- U_[leaf_basis_subindex,leaf_basis_subindex, drop = FALSE]
     U_inv_ <- U_
     Q_ <- (crossprod(D_leaf) + data$tau^(-1)*U_inv_)
     Q_inv_ <- chol2inv(chol(Q_))
@@ -969,6 +978,10 @@ update_tau_betas_j <- function(forest,
   # Setting some default hyperparameters
   # a_tau_beta <- d_tau_beta <- 0.1
   # Setting some default hyperparameters
+  # a_tau_beta <- 0.1
+  # d_tau_beta <- 0.1
+
+  # Setting some default hyperparameters
   a_tau_beta <- data$a_tau_beta_j
   d_tau_beta <- data$d_tau_beta_j
 
@@ -977,9 +990,9 @@ update_tau_betas_j <- function(forest,
 
 
   if(data$interaction_term){
-    tau_b_shape <- numeric(NCOL(data$x_train)+length(data$interaction_list))
-    tau_b_rate <- numeric(NCOL(data$x_train)+length(data$interaction_list))
-    tau_beta_vec_aux <- numeric(NCOL(data$x_train)+length(data$interaction_list))
+    tau_b_shape <- numeric(NCOL(data$x_train)+NCOL(data$interaction_list))
+    tau_b_rate <- numeric(NCOL(data$x_train)+NCOL(data$interaction_list))
+    tau_beta_vec_aux <- numeric(NCOL(data$x_train)+NCOL(data$interaction_list))
   } else{
     tau_b_shape <- numeric(NCOL(data$x_train))
     tau_b_rate <- numeric(NCOL(data$x_train))
@@ -1014,14 +1027,15 @@ update_tau_betas_j <- function(forest,
 
 
             # Getting ht leaf basis
-            leaf_basis_subindex <- unlist(data$basis_subindex[var_]) # Recall to the unique() function here
-            p_ <- length(leaf_basis_subindex)
-            betas_mat_ <- matrix(cu_t$betas_vec[leaf_basis_subindex],nrow = p_)
-            if(!is.null(cu_t$betas_vec)){
-              tau_b_shape[var_] <- tau_b_shape[var_] + p_
-              tau_b_rate[var_] <- tau_b_rate[var_] + c(crossprod(betas_mat_,crossprod(data$P[leaf_basis_subindex,leaf_basis_subindex, drop = FALSE],betas_mat_)))
-            }
+            for(kk in 1: length(var_)){
+              leaf_basis_subindex <- unlist(data$basis_subindex[var_[kk]]) # Recall to the unique() function here
+              p_ <- length(leaf_basis_subindex)
+              betas_mat_ <- matrix(cu_t$betas_vec[leaf_basis_subindex],nrow = p_)
 
+              tau_b_shape[var_[kk]] <- tau_b_shape[var_[kk]] + p_
+              tau_b_rate[var_[kk]] <- tau_b_rate[var_[kk]] + c(crossprod(betas_mat_,crossprod(data$P[leaf_basis_subindex,leaf_basis_subindex, drop = FALSE],betas_mat_)))
+
+            }
       # }
 
     }
@@ -1030,7 +1044,7 @@ update_tau_betas_j <- function(forest,
   }
 
   if(data$interaction_term){
-      for(j in 1:(NCOL(data$x_train)+length(data$interaction_list))){
+      for(j in 1:(NCOL(data$x_train)+NCOL(data$interaction_list)) ){
         tau_beta_vec_aux[j] <- rgamma(n = 1,
                                    shape = 0.5*tau_b_shape[j] + a_tau_beta,
                                    rate = 0.5*tau_b_rate[j] + d_tau_beta)

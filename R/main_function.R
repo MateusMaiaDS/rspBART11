@@ -174,7 +174,6 @@ rspBART <- function(x_train,
     basis_size <- (nIknots+degree_)
   } else {
     if(interaction_term){ # Checking the interaction
-
       # Checking all possible interactions
       basis_size <- (nrow(new_knots)-ord_)     # Change this value to the desired size of each sublist
     } else {
@@ -363,6 +362,7 @@ rspBART <- function(x_train,
     rgamma(n = 1000,shape = a_tau_beta_j,rate = d_tau_beta_j) |> density() |> plot(main = "density prior \tau_beta_j")
     mean(rgamma(n = 1000,shape = a_tau_beta_j,rate = d_tau_beta_j))
   }
+
   # Call the bart function
   tau_init <- nsigma^(-2)
 
@@ -379,7 +379,7 @@ rspBART <- function(x_train,
   all_trees <- vector("list", n_mcmc)
   all_betas <- vector("list",n_mcmc)
   if(interaction_term){
-    tau_beta <- rep(tau_mu,NCOL(x_train_scale)+length(interaction_list))
+    tau_beta <- rep(tau_mu,NCOL(x_train_scale)+NCOL(interaction_list))
     # tau_beta <- rep(tau_mu, NCOL(x_train_scale))
   } else {
     tau_beta <- rep(tau_mu,NCOL(x_train_scale))
@@ -391,7 +391,7 @@ rspBART <- function(x_train,
 
   # In this first scenario we are going to work with a single value of \tau
   if(interaction_term){
-    all_tau_beta <- matrix(NA, nrow = (n_mcmc), ncol = NCOL(x_train_scale)+length(interaction_list))
+    all_tau_beta <- matrix(NA, nrow = (n_mcmc), ncol = NCOL(x_train_scale)+NCOL(interaction_list))
   } else {
     all_tau_beta <- matrix(NA, nrow = (n_mcmc), ncol = NCOL(x_train_scale))
   }
@@ -610,8 +610,9 @@ rspBART <- function(x_train,
       # }
 
       # Checking the trees variables
-      # lapply(forest,function(x){x$node0$j}) %>% unlist%>% table()
+      lapply(forest,function(x){x$node0$j}) %>% unlist%>% table()
 
+      forest[[1]] %>% lapply(function(x) x$inter) %>% unlist()
       # # Forcing to grow when only have a stump
       # if(length(forest[[t]])==1){
       #   if(!data$all_var){
@@ -773,7 +774,7 @@ rspBART <- function(x_train,
   all_tau_norm <- numeric(n_mcmc)
 
   if(interaction_term){
-    all_tau_beta_norm <- matrix(NA,nrow = n_mcmc,ncol = NCOL(x_train_scale)+length(interaction_list))
+    all_tau_beta_norm <- matrix(NA,nrow = n_mcmc,ncol = NCOL(x_train_scale)+NCOL(interaction_list))
   } else {
     all_tau_beta_norm <- matrix(NA,nrow = n_mcmc,ncol = NCOL(x_train_scale))
   }

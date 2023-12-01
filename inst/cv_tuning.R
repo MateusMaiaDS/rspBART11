@@ -9,11 +9,11 @@ source("R/sim_functions.R")
 source("R/main_function.R")
 set.seed(42)
 
-n_ <- 500
+n_ <- 250
 sd_ <- 1
 n_rep_ <- 10
-nIknots_ <- 5
-ntree_ <- 10
+nIknots_ <- 2
+ntree_ <- 100
 dif_order_ <- 1
 use_bs_ <- FALSE
 seed_ <- 42
@@ -144,14 +144,14 @@ if(type_ == "friedman_nointer_nonoise"){
 }
 
 if(type_ == "friedman_inter_noise"){
-      saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART11/friedman/STDV1_new_interaction_",inter_,"_oned_n_",n_,
+      saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART11/friedman/v3_new_interaction_",inter_,"_oned_n_",n_,
                                             "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,"_bs_",use_bs_,
                                             "_motr_bart_",motr_bart_,"_allvar_",all_,"_stump_",stump_,
                                             "_sinit_",scale_init_,"_alpha_",alpha_,"_uptaubeta_",update_tau_beta_,"_dif_",dif_order_,".Rds"))
 }
 
 if(type_ == "friedman_nointer_noise"){
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART11/friedman_noint_noise/oned_n_",n_,
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART11/friedman_noint_noise/v3_new_interaction_n_",n_,
                                         "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,"_bs_",use_bs_,
                                         "_motr_bart_",motr_bart_,"_allvar_",all_,"_stump_",stump_,
                                         "_sinit_",scale_init_,"_alpha_",alpha_,"_uptaubeta_",update_tau_beta_,"_dif_",dif_order_,".Rds"))
