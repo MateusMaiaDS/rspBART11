@@ -9,11 +9,11 @@ source("R/sim_functions.R")
 source("R/main_function.R")
 set.seed(42)
 
-n_ <- 250
+n_ <- 1000
 sd_ <- 1
 n_rep_ <- 10
 nIknots_ <- 2
-ntree_ <- 100
+ntree_ <- 50
 dif_order_ <- 1
 use_bs_ <- FALSE
 seed_ <- 42
